@@ -1,14 +1,11 @@
 package com.cxs.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxs.base.BasePageBean;
-import com.cxs.base.BaseRequest;
 import com.cxs.base.BaseResult;
 import com.cxs.base.UserSubject;
 import com.cxs.dto.KeyWordSearchPageDTO;
@@ -16,23 +13,12 @@ import com.cxs.dto.article.comment.GetArticleCommentListDTO;
 import com.cxs.dto.article.comment.OperaCommentDTO;
 import com.cxs.dto.article.comment.PublishCommentDTO;
 import com.cxs.enums.CurrencyErrorEnum;
-import com.cxs.mapper.ArticleCommentLikeMapper;
-import com.cxs.mapper.ArticleMapper;
-import com.cxs.mapper.UserAuthMapper;
-import com.cxs.mapper.UserMapper;
-import com.cxs.model.Article;
-import com.cxs.model.ArticleComment;
-import com.cxs.model.ArticleCommentLike;
-import com.cxs.model.ArticleDraft;
-import com.cxs.model.User;
-import com.cxs.model.UserAuth;
+import com.cxs.mapper.*;
+import com.cxs.model.*;
 import com.cxs.service.ArticleCommentService;
-import com.cxs.mapper.ArticleCommentMapper;
 import com.cxs.service.UserService;
-import com.cxs.utils.DateUtil;
 import com.cxs.utils.TimeUtil;
 import com.cxs.vo.admin.comment.AdminCommentVO;
-import com.cxs.vo.article.ArticleDraftVO;
 import com.cxs.vo.comment.ArticleCommentVO;
 import com.cxs.vo.user.SimpleUserVO;
 import com.cxs.vo.user.UserCommentListVO;
@@ -46,43 +32,37 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
-* @author DELL
-* @description 针对表【t_article_comment(文章评论表)】的数据库操作Service实现
-* @createDate 2022-11-26 09:00:21
-*/
+ * @author DELL
+ * @description 针对表【t_article_comment(文章评论表)】的数据库操作Service实现
+ * @createDate 2022-11-26 09:00:21
+ */
 @Slf4j
 @Service
-public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper, ArticleComment> implements ArticleCommentService{
-
+public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper, ArticleComment> implements ArticleCommentService {
+    
     @Autowired
     private ArticleCommentMapper articleCommentMapper;
-
+    
     @Autowired
     private UserService userService;
-
+    
     @Autowired
     private UserMapper userMapper;
-
+    
     @Autowired
     private ArticleMapper articleMapper;
-
+    
     @Autowired
     private ArticleCommentLikeMapper articleCommentLikeMapper;
-
+    
     @Autowired
     private UserAuthMapper userAuthMapper;
-
+    
     @Override
     public void getMyCommentList(KeyWordSearchPageDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -105,14 +85,12 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
                 LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
                 userLambdaQueryWrapper.select(User::getUserId, User::getNickName, User::getAvatar).in(User::getUserId, toUserIds);
                 List<User> userList = userMapper.selectList(userLambdaQueryWrapper);
-                Map<String, User> userMap = CollectionUtils.isEmpty(userList) ? new HashMap<>() :
-                        userList.stream().collect(Collectors.toMap(User::getUserId, Function.identity(), (o1, o2) -> o1));
+                Map<String, User> userMap = CollectionUtils.isEmpty(userList) ? new HashMap<>() : userList.stream().collect(Collectors.toMap(User::getUserId, Function.identity(), (o1, o2) -> o1));
                 // 查询文章
                 LambdaQueryWrapper<Article> articleLambdaQueryWrapper = new LambdaQueryWrapper<>();
                 articleLambdaQueryWrapper.select(Article::getArticleId, Article::getArticleTitle).eq(Article::getArticleStatus, 1).in(Article::getArticleId, articleIds);
                 List<Article> articleList = articleMapper.selectList(articleLambdaQueryWrapper);
-                Map<Integer, Article> articleMap = CollectionUtils.isEmpty(articleList) ? new HashMap<>() :
-                        articleList.stream().collect(Collectors.toMap(Article::getArticleId, Function.identity(), (o1, o2) -> o1));
+                Map<Integer, Article> articleMap = CollectionUtils.isEmpty(articleList) ? new HashMap<>() : articleList.stream().collect(Collectors.toMap(Article::getArticleId, Function.identity(), (o1, o2) -> o1));
                 for (ArticleComment record : records) {
                     UserCommentListVO vo = new UserCommentListVO();
                     BeanUtils.copyProperties(record, vo);
@@ -146,7 +124,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
             log.info("【{}】【用户中心获取我的评论列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void deleteComment(Integer commentId, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -186,31 +164,25 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
             log.info("【{}】【用户删除评论接口】【{}ms】 \n入参:{}\n出参:{}", "删除", endTime - startTime, commentId, result);
         }
     }
-
+    
     @Override
     public void publishComment(PublishCommentDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
         try {
             UserSubject userByToken = userService.getUserByToken(request);
-            String commentTo = dto.getCommentTo();
-            if (userByToken.getId().equals(commentTo)) {
-                result.setCode(CurrencyErrorEnum.OPERA_ERROR.getCode());
-                result.setMsg(CurrencyErrorEnum.OPERA_ERROR.getMsg() + ",不能自己回复自己");
+            UserAuth userAuth = userAuthMapper.selectById(userByToken.getId());
+            if (!userAuth.getCommentAuth()) {
+                result.setCode(CurrencyErrorEnum.AUTH_LOCK.getCode());
+                result.setMsg(CurrencyErrorEnum.AUTH_LOCK.getMsg() + ",暂无法进行评论,请联系管理员");
             } else {
-                UserAuth userAuth = userAuthMapper.selectById(userByToken.getId());
-                if (!userAuth.getCommentAuth()) {
-                    result.setCode(CurrencyErrorEnum.AUTH_LOCK.getCode());
-                    result.setMsg(CurrencyErrorEnum.AUTH_LOCK.getMsg() + ",暂无法进行评论,请联系管理员");
-                } else {
-                    ArticleComment comment = new ArticleComment();
-                    BeanUtils.copyProperties(dto, comment);
-                    comment.setCommentFrom(userByToken.getId());
-                    comment.setCommentTime(LocalDateTime.now());
-                    int insert = articleCommentMapper.insert(comment);
-                    if (insert != 1) {
-                        result.setCode(CurrencyErrorEnum.DATABASE_ERROR.getCode());
-                        result.setMsg(CurrencyErrorEnum.DATABASE_ERROR.getMsg());
-                    }
+                ArticleComment comment = new ArticleComment();
+                BeanUtils.copyProperties(dto, comment);
+                comment.setCommentFrom(userByToken.getId());
+                comment.setCommentTime(LocalDateTime.now());
+                int insert = articleCommentMapper.insert(comment);
+                if (insert != 1) {
+                    result.setCode(CurrencyErrorEnum.DATABASE_ERROR.getCode());
+                    result.setMsg(CurrencyErrorEnum.DATABASE_ERROR.getMsg());
                 }
             }
         } catch (Exception e) {
@@ -222,7 +194,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
             log.info("【{}】【用户评论接口】【{}ms】 \n入参:{}\n出参:{}", "新增", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void getArticleCommentList(GetArticleCommentListDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -240,7 +212,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
                     ArticleCommentVO vo = new ArticleCommentVO();
                     BeanUtils.copyProperties(r, vo);
                     // 处理用户点赞状态、总的点赞数
-                    if(!ObjectUtils.isEmpty(userByToken)) {
+                    if (!ObjectUtils.isEmpty(userByToken)) {
                         LambdaQueryWrapper<ArticleCommentLike> likeQueryWrapper = new LambdaQueryWrapper<>();
                         likeQueryWrapper.eq(ArticleCommentLike::getUserId, userByToken.getId()).eq(ArticleCommentLike::getCommentId, r.getCommentId()).select(ArticleCommentLike::getId);
                         List<ArticleCommentLike> articleCommentLikes = articleCommentLikeMapper.selectList(likeQueryWrapper);
@@ -265,7 +237,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
                         BeanUtils.copyProperties(fromUser, userFromVO);
                         vo.setCommentFrom(userFromVO);
                     }
-
+                    
                     SimpleUserVO userToVO = new SimpleUserVO();
                     User toUser = userMap.get(r.getCommentTo());
                     if (!ObjectUtils.isEmpty(toUser)) {
@@ -274,7 +246,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
                     }
                     return vo;
                 }).collect(Collectors.toList());
-
+                
                 voList.parallelStream().forEach(s -> {
                     LambdaQueryWrapper<ArticleComment> commentLambdaQueryWrapper = new LambdaQueryWrapper<>();
                     commentLambdaQueryWrapper.eq(ArticleComment::getParentCommentId, s.getCommentId()).orderByDesc(ArticleComment::getTop).orderByAsc(ArticleComment::getCommentTime);
@@ -297,7 +269,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
                             vo.setLikeCount(articleCommentLikeMapper.selectCount(countQueryWrapper));
                             // 时间格式化
                             vo.setCommentTimeFormat(TimeUtil.formatDefault(r.getCommentTime()));
-
+                            
                             List<String> userIds = new ArrayList<>(2);
                             userIds.add(r.getCommentTo());
                             userIds.add(r.getCommentFrom());
@@ -311,7 +283,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
                                 BeanUtils.copyProperties(fromUser, userFromVO);
                                 vo.setCommentFrom(userFromVO);
                             }
-
+                            
                             SimpleUserVO userToVO = new SimpleUserVO();
                             User toUser = userMap.get(r.getCommentTo());
                             if (!ObjectUtils.isEmpty(toUser)) {
@@ -339,7 +311,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
             log.info("【{}】【获取评论接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void operaComment(OperaCommentDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -380,7 +352,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
             log.info("【{}】【用户评论操作接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void adminGetCommentInfo(Integer commentId, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -393,7 +365,7 @@ public class ArticleCommentServiceImpl extends ServiceImpl<ArticleCommentMapper,
             }
             AdminCommentVO vo = new AdminCommentVO();
             BeanUtils.copyProperties(comment, vo);
-
+            
             LambdaQueryWrapper<ArticleComment> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(ArticleComment::getParentCommentId, commentId).orderByDesc(ArticleComment::getCommentTime);
             List<ArticleComment> articleComments = articleCommentMapper.selectList(queryWrapper);

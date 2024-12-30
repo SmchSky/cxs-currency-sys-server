@@ -8,15 +8,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cxs.auth.AuthUser;
-import com.cxs.base.BasePageBean;
-import com.cxs.base.BaseRequest;
-import com.cxs.base.Token;
-import com.cxs.base.UserSubject;
-import com.cxs.base.BaseResult;
+import com.cxs.base.*;
 import com.cxs.client.LocationClient;
 import com.cxs.client.req.LocationReq;
 import com.cxs.client.resp.LocationResp;
 import com.cxs.config.CommonConfig;
+import com.cxs.config.CompletableFutureService;
 import com.cxs.config.SystemInnerConfig;
 import com.cxs.constant.CachePrefixContent;
 import com.cxs.constant.CommonContent;
@@ -24,84 +21,25 @@ import com.cxs.constant.ResponseStateConstant;
 import com.cxs.dto.KeyWordSearchDTO;
 import com.cxs.dto.UserLoginDTO;
 import com.cxs.dto.UserRegirsterDTO;
-import com.cxs.dto.admin.user.CreateUserDTO;
-import com.cxs.dto.admin.user.GetSimpleUserListDTO;
-import com.cxs.dto.admin.user.GetUserListDTO;
-import com.cxs.dto.admin.user.UpdateStatusDTO;
-import com.cxs.dto.admin.user.UpdateUserAuthDTO;
-import com.cxs.dto.admin.user.UpdateUserInfoDTO;
-import com.cxs.dto.admin.user.UpdateUserPwdDTO;
-import com.cxs.dto.profile.CheckEmailBindDTO;
-import com.cxs.dto.profile.CheckOldPasswordDTO;
-import com.cxs.dto.profile.CheckUsernameDTO;
-import com.cxs.dto.profile.UpdatePwdDTO;
-import com.cxs.dto.profile.UpdateSelfInfoDTO;
-import com.cxs.dto.profile.UserPointSettingDTO;
-import com.cxs.dto.profile.UserReceiveEmailNoticeSettingDTO;
-import com.cxs.dto.profile.UserRewardSettingDTO;
-import com.cxs.dto.profile.UserupdateRewardImgInfoDTO;
+import com.cxs.dto.admin.user.*;
+import com.cxs.dto.profile.*;
 import com.cxs.enums.CurrencyErrorEnum;
-import com.cxs.mapper.ArticleCollectionMapper;
-import com.cxs.mapper.ArticleCommentMapper;
-import com.cxs.mapper.ArticleMapper;
-import com.cxs.mapper.FeedbackMapper;
-import com.cxs.mapper.FeedbackReplyMapper;
-import com.cxs.mapper.PointRechargeTypeMapper;
-import com.cxs.mapper.PointTradeFlowMapper;
-import com.cxs.mapper.PointTradeOrderMapper;
-import com.cxs.mapper.ReportMapper;
-import com.cxs.mapper.RoleMapper;
-import com.cxs.mapper.UserAuthMapper;
-import com.cxs.mapper.UserLoginLogMapper;
-import com.cxs.mapper.UserRewardMapper;
-import com.cxs.mapper.UserSettingMapper;
-import com.cxs.model.Article;
-import com.cxs.model.ArticleCollection;
-import com.cxs.model.ArticleComment;
-import com.cxs.model.Feedback;
-import com.cxs.model.FeedbackReply;
-import com.cxs.model.PointRechargeType;
-import com.cxs.model.PointTradeFlow;
-import com.cxs.model.PointTradeOrder;
-import com.cxs.model.Report;
-import com.cxs.model.Role;
-import com.cxs.model.User;
-import com.cxs.model.UserAuth;
-import com.cxs.model.UserLoginLog;
-import com.cxs.model.UserReward;
-import com.cxs.model.UserRole;
-import com.cxs.model.UserSetting;
-import com.cxs.config.CompletableFutureService;
+import com.cxs.mapper.*;
+import com.cxs.model.*;
 import com.cxs.service.MenuService;
 import com.cxs.service.UserRoleService;
 import com.cxs.service.UserService;
-import com.cxs.mapper.UserMapper;
 import com.cxs.utils.AesUtil;
 import com.cxs.utils.JwtUtil;
 import com.cxs.utils.RedisUtil;
 import com.cxs.vo.admin.AdminLoginVO;
-import com.cxs.vo.admin.menu.AdminMenuInfoVO;
 import com.cxs.vo.admin.AdminUserVO;
+import com.cxs.vo.admin.menu.AdminMenuInfoVO;
 import com.cxs.vo.admin.user.AdminUserViewVO;
 import com.cxs.vo.admin.user.GetUserListVO;
 import com.cxs.vo.admin.user.SearchUserVO;
 import com.cxs.vo.admin.user.UserDetailVO;
-import com.cxs.vo.user.PointTradeFlowVO;
-import com.cxs.vo.user.UserArticleCollListVO;
-import com.cxs.vo.user.UserArticlePublishListVO;
-import com.cxs.vo.user.TokenCheckVO;
-import com.cxs.vo.user.UserFeedbackInfoVO;
-import com.cxs.vo.user.UserFeedbackListVO;
-import com.cxs.vo.user.UserLoginLogVO;
-import com.cxs.vo.user.UserLoginVO;
-import com.cxs.vo.user.UserOrderListVO;
-import com.cxs.vo.user.UserProfileVO;
-import com.cxs.vo.user.UserReportArticleInfoVO;
-import com.cxs.vo.user.UserReportCommentInfoVO;
-import com.cxs.vo.user.UserReportInfoVO;
-import com.cxs.vo.user.UserReportListVO;
-import com.cxs.vo.user.UserSettingDetailVO;
-import com.cxs.vo.user.UserVO;
+import com.cxs.vo.user.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,103 +65,104 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
-* @author DELL
-* @description 针对表【t_user(用户信息表)】的数据库操作Service实现
-* @createDate 2022-11-12 12:37:56
-*/
+ * @author DELL
+ * @description 针对表【t_user(用户信息表)】的数据库操作Service实现
+ * @createDate 2022-11-12 12:37:56
+ */
 @Service
 @Slf4j
-public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService{
-
+public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+    
     @Autowired
     private UserMapper userMapper;
-
+    
     @Autowired
     private AuthenticationManager authenticationManager;
-
+    
     @Autowired
     private UserLoginLogMapper userLoginLogMapper;
-
+    
     @Autowired
     private LocationClient locationClient;
-
+    
     @Autowired
     private JwtUtil jwtUtil;
-
+    
     @Autowired
     private RedisUtil redisUtil;
-
+    
     @Autowired
     private CommonConfig commonConfig;
-
+    
     @Autowired
     private MenuService menuService;
-
+    
     @Autowired
     private SystemInnerConfig systemInnerConfig;
-
+    
     @Autowired
     private RoleMapper roleMapper;
-
+    
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    
     @Autowired
     private UserRoleService userRoleService;
-
+    
     @Autowired
     private UserSettingMapper userSettingMapper;
-
+    
     @Autowired
     private UserRewardMapper userRewardMapper;
-
+    
     @Autowired
     private CompletableFutureService completableFutureService;
-
+    
     @Autowired
     private ArticleMapper articleMapper;
-
+    
     @Autowired
     private ArticleCommentMapper articleCommentMapper;
-
+    
     @Autowired
     private ArticleCollectionMapper articleCollectionMapper;
-
+    
     @Autowired
     private FeedbackMapper feedbackMapper;
-
+    
     @Autowired
     private FeedbackReplyMapper feedbackReplyMapper;
-
+    
     @Autowired
     private UserAuthMapper userAuthMapper;
-
+    
     @Autowired
     private PointTradeFlowMapper pointTradeFlowMapper;
-
+    
     @Autowired
     private ReportMapper reportMapper;
-
+    
     @Autowired
     private PointTradeOrderMapper pointTradeOrderMapper;
-
+    
     @Autowired
     private PointRechargeTypeMapper pointRechargeTypeMapper;
-
+    
     @Autowired
     private AesUtil aesUtil;
-
+    
+    @Autowired
+    private TagMapper tagMapper;
+    
+    @Autowired
+    private ArticleReadMapper articleReadMapper;
+    
     @Override
     public void login(UserLoginDTO dto, HttpServletRequest request, HttpServletResponse response, BaseResult result) {
         String accessTokenKey = request.getHeader(CommonContent.ACCESS_TOKEN);
@@ -239,7 +178,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 String generateToken = jwtUtil.generateToken(token.getUser());
                 redisUtil.set(redisUtil.getCacheKey(CachePrefixContent.TOKEN_PREFIX, accessTokenKey), generateToken, commonConfig.getValidityTime(), TimeUnit.MINUTES);
                 Token parseToken = jwtUtil.parseToken(generateToken);
-                if (!ObjectUtils.isEmpty(parseToken)) parseToken.setToken(accessTokenKey);
+                if (!ObjectUtils.isEmpty(parseToken))
+                    parseToken.setToken(accessTokenKey);
                 Cookie loginCookie = new Cookie(CommonContent.ACCESS_TOKEN, accessTokenKey);
                 loginCookie.setPath("/");
                 loginCookie.setDomain(commonConfig.getDomian());
@@ -258,13 +198,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 if (!ObjectUtils.isEmpty(locationResp) && locationResp.getStatus() == 0) {
                     address = locationResp.getContent().getAddress();
                 }
-                UserLoginLog loginLog = UserLoginLog.builder()
-                        .loginMode(1)
-                        .loginTime(LocalDateTime.now())
-                        .loginIp(getIpAddr(request))
-                        .userId(userInfo.getUserId())
-                        .loginAddress(address)
-                        .build();
+                UserLoginLog loginLog = UserLoginLog.builder().loginMode(1).loginTime(LocalDateTime.now()).loginIp(getIpAddr(request)).userId(userInfo.getUserId()).loginAddress(address).build();
                 int insert = userLoginLogMapper.insert(loginLog);
                 if (insert == 1) {
                     result.setCode(ResponseStateConstant.OPERA_SUCCESS).setData(vo).setMsg("登陆成功");
@@ -289,13 +223,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             SecurityContextHolder.getContext().setAuthentication(authenticate);
             Object principal = authenticate.getPrincipal();
             AuthUser user = (AuthUser) principal;
-            List<String> auths = CollectionUtils.isEmpty(user.getAuthorities()) ? new ArrayList<>(0) :
-                    user.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList());
+            List<String> auths = CollectionUtils.isEmpty(user.getAuthorities()) ? new ArrayList<>(0) : user.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList());
             String tokenStr = IdUtil.simpleUUID();
-            String generateToken = jwtUtil.generateToken(UserSubject.builder()
-                    .id(user.getId())
-                    .username(user.getUsername())
-                    .authentications(auths).build());
+            String generateToken = jwtUtil.generateToken(UserSubject.builder().id(user.getId()).username(user.getUsername()).authentications(auths).build());
             redisUtil.set(redisUtil.getCacheKey(CachePrefixContent.TOKEN_PREFIX, tokenStr), generateToken, commonConfig.getValidityTime(), TimeUnit.MINUTES);
             Token parseToken = jwtUtil.parseToken(generateToken);
             Cookie loginCookie = new Cookie(CommonContent.ACCESS_TOKEN, tokenStr);
@@ -303,7 +233,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             loginCookie.setDomain(commonConfig.getDomian());
             loginCookie.setMaxAge(commonConfig.getValidityTime().intValue() * 60);
             response.addCookie(loginCookie);
-            if (!ObjectUtils.isEmpty(parseToken)) parseToken.setToken(tokenStr);
+            if (!ObjectUtils.isEmpty(parseToken))
+                parseToken.setToken(tokenStr);
             vo.setTokenInfo(parseToken);
             UserVO userVO = new UserVO();
             User userInfo = userMapper.selectById(user.getId());
@@ -316,13 +247,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (!ObjectUtils.isEmpty(locationResp) && locationResp.getStatus() == 0) {
                 address = locationResp.getContent().getAddress();
             }
-            UserLoginLog loginLog = UserLoginLog.builder()
-                    .loginMode(1)
-                    .loginTime(LocalDateTime.now())
-                    .loginIp(getIpAddr(request))
-                    .userId(userInfo.getUserId())
-                    .loginAddress(address)
-                    .build();
+            UserLoginLog loginLog = UserLoginLog.builder().loginMode(1).loginTime(LocalDateTime.now()).loginIp(getIpAddr(request)).userId(userInfo.getUserId()).loginAddress(address).build();
             int insert = userLoginLogMapper.insert(loginLog);
             if (insert == 1) {
                 result.setCode(ResponseStateConstant.OPERA_SUCCESS).setData(vo).setMsg("登陆成功");
@@ -331,7 +256,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
         }
     }
-
+    
     @Override
     public void checkToken(HttpServletRequest request, BaseResult result) {
         String accessTokenKey = request.getHeader(CommonContent.ACCESS_TOKEN);
@@ -357,9 +282,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StringUtils.hasLength(tokenStr)) {
             vo.setStatus(Boolean.FALSE);
             vo.setToken(null);
-            result.setCode(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getCode())
-                    .setData(vo)
-                    .setMsg(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getMsg());
+            result.setCode(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getCode()).setData(vo).setMsg(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getMsg());
         } else {
             Token token = jwtUtil.parseToken(tokenStr);
             if (!ObjectUtils.isEmpty(token)) {
@@ -370,7 +293,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             result.setCode(ResponseStateConstant.OPERA_SUCCESS).setData(vo);
         }
     }
-
+    
     @Override
     public void checkToken(String token, BaseResult result) {
         String accessTokenKey = token;
@@ -383,9 +306,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!StringUtils.hasLength(tokenStr)) {
             vo.setStatus(Boolean.FALSE);
             vo.setToken(null);
-            result.setCode(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getCode())
-                    .setData(vo)
-                    .setMsg(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getMsg());
+            result.setCode(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getCode()).setData(vo).setMsg(CurrencyErrorEnum.UNAUTHORIZED_BE_OVERDUE.getMsg());
         } else {
             Token tokenVO = jwtUtil.parseToken(tokenStr);
             if (!ObjectUtils.isEmpty(token)) {
@@ -396,7 +317,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             result.setCode(ResponseStateConstant.OPERA_SUCCESS).setData(vo);
         }
     }
-
+    
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, BaseResult result) {
         String header = request.getHeader(CommonContent.ACCESS_TOKEN);
@@ -410,7 +331,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         cookie.setMaxAge(-1);
         response.addCookie(cookie);
     }
-
+    
     @Override
     public void adminLogin(UserLoginDTO dto, HttpServletRequest request, BaseResult result) {
         String accessTokenKey = request.getHeader(CommonContent.ACCESS_TOKEN);
@@ -430,7 +351,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     String generateToken = jwtUtil.generateToken(token.getUser());
                     redisUtil.set(redisUtil.getCacheKey(CachePrefixContent.TOKEN_PREFIX, accessTokenKey), generateToken, commonConfig.getValidityTime(), TimeUnit.MINUTES);
                     Token parseToken = jwtUtil.parseToken(generateToken);
-                    if (!ObjectUtils.isEmpty(parseToken)) parseToken.setToken(accessTokenKey);
+                    if (!ObjectUtils.isEmpty(parseToken))
+                        parseToken.setToken(accessTokenKey);
                     AdminLoginVO vo = new AdminLoginVO();
                     vo.setTokenInfo(parseToken);
                     AdminUserVO userVO = new AdminUserVO();
@@ -451,13 +373,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     if (!ObjectUtils.isEmpty(locationResp) && locationResp.getStatus() == 0) {
                         address = locationResp.getContent().getAddress();
                     }
-                    UserLoginLog loginLog = UserLoginLog.builder()
-                            .loginMode(2)
-                            .loginTime(LocalDateTime.now())
-                            .loginIp(getIpAddr(request))
-                            .userId(userInfo.getUserId())
-                            .loginAddress(address)
-                            .build();
+                    UserLoginLog loginLog = UserLoginLog.builder().loginMode(2).loginTime(LocalDateTime.now()).loginIp(getIpAddr(request)).userId(userInfo.getUserId()).loginAddress(address).build();
                     int insert = userLoginLogMapper.insert(loginLog);
                     if (insert == 1) {
                         result.setCode(ResponseStateConstant.OPERA_SUCCESS).setData(vo).setMsg("登陆成功");
@@ -483,19 +399,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             SecurityContextHolder.getContext().setAuthentication(authenticate);
             Object principal = authenticate.getPrincipal();
             AuthUser user = (AuthUser) principal;
-            List<String> auths = CollectionUtils.isEmpty(user.getAuthorities()) ? new ArrayList<>(0) :
-                    user.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList());
+            List<String> auths = CollectionUtils.isEmpty(user.getAuthorities()) ? new ArrayList<>(0) : user.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toList());
             if (CollectionUtils.isEmpty(auths) || !(auths.contains(CommonContent.SUPER_ADMIN_FLAG) || auths.contains(CommonContent.ADMIN_FLAG))) {
                 result.setCode(CurrencyErrorEnum.ADMIN_LOGIN_FORBIDDEN.getCode()).setMsg(CurrencyErrorEnum.ADMIN_LOGIN_FORBIDDEN.getMsg());
             } else {
                 String tokenStr = IdUtil.simpleUUID();
-                String generateToken = jwtUtil.generateToken(UserSubject.builder()
-                        .id(user.getId())
-                        .username(user.getUsername())
-                        .authentications(auths).build());
+                String generateToken = jwtUtil.generateToken(UserSubject.builder().id(user.getId()).username(user.getUsername()).authentications(auths).build());
                 redisUtil.set(redisUtil.getCacheKey(CachePrefixContent.TOKEN_PREFIX, tokenStr), generateToken, commonConfig.getValidityTime(), TimeUnit.MINUTES);
                 Token parseToken = jwtUtil.parseToken(generateToken);
-                if (!ObjectUtils.isEmpty(parseToken)) parseToken.setToken(tokenStr);
+                if (!ObjectUtils.isEmpty(parseToken))
+                    parseToken.setToken(tokenStr);
                 vo.setTokenInfo(parseToken);
                 AdminUserVO userVO = new AdminUserVO();
                 User userInfo = userMapper.selectById(parseToken.getUser().getId());
@@ -515,13 +428,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 if (!ObjectUtils.isEmpty(locationResp) && locationResp.getStatus() == 0) {
                     address = locationResp.getContent().getAddress();
                 }
-                UserLoginLog loginLog = UserLoginLog.builder()
-                        .loginMode(2)
-                        .loginTime(LocalDateTime.now())
-                        .loginIp(getIpAddr(request))
-                        .userId(userInfo.getUserId())
-                        .loginAddress(address)
-                        .build();
+                UserLoginLog loginLog = UserLoginLog.builder().loginMode(2).loginTime(LocalDateTime.now()).loginIp(getIpAddr(request)).userId(userInfo.getUserId()).loginAddress(address).build();
                 int insert = userLoginLogMapper.insert(loginLog);
                 if (insert == 1) {
                     result.setCode(ResponseStateConstant.OPERA_SUCCESS).setData(vo).setMsg("登陆成功");
@@ -531,7 +438,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
         }
     }
-
+    
     @Override
     public void getUserLoginLog(BaseRequest dto, HttpServletRequest request, BaseResult result) {
         UserSubject userByToken = getUserByToken(request);
@@ -546,17 +453,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         pageBean.setPageSize(selectPage.getSize());
         pageBean.setPages(selectPage.getPages());
         pageBean.setTotal(selectPage.getTotal());
-        pageBean.setData(
-                CollectionUtils.isEmpty(selectPage.getRecords()) ? new ArrayList<>(0):
-                        selectPage.getRecords().stream().map(l -> {
-                            UserLoginLogVO vo = new UserLoginLogVO();
-                            BeanUtils.copyProperties(l, vo);
-                            return vo;
-                        }).collect(Collectors.toList())
-        );
+        pageBean.setData(CollectionUtils.isEmpty(selectPage.getRecords()) ? new ArrayList<>(0) : selectPage.getRecords().stream().map(l -> {
+            UserLoginLogVO vo = new UserLoginLogVO();
+            BeanUtils.copyProperties(l, vo);
+            return vo;
+        }).collect(Collectors.toList()));
         result.setData(pageBean);
     }
-
+    
     @Override
     public UserSubject getUserByToken(HttpServletRequest request) {
         BaseResult result = BaseResult.ok();
@@ -576,7 +480,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return null;
     }
-
+    
     @Override
     public UserSubject getUserByToken(String token) {
         BaseResult result = BaseResult.ok();
@@ -596,7 +500,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return null;
     }
-
+    
     @Override
     public void getUserInfo(HttpServletRequest request, BaseResult result) {
         AdminUserVO userVO = new AdminUserVO();
@@ -609,13 +513,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = userMapper.selectById(token.getId());
         BeanUtils.copyProperties(user, userVO);
         List<Role> roles = roleMapper.selectRoleByUserId(user.getUserId());
-        List<String> roleList = CollectionUtils.isEmpty(roles) ? new ArrayList<>(0) :
-                roles.stream().map(Role::getRoleName).collect(Collectors.toList());
+        List<String> roleList = CollectionUtils.isEmpty(roles) ? new ArrayList<>(0) : roles.stream().map(Role::getRoleName).collect(Collectors.toList());
         userVO.setRoles(roleList);
         result.setData(userVO);
-
+        
     }
-
+    
     @Override
     public void getUserList(GetUserListDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -625,26 +528,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String keyWord = dto.getKeyWord();
             wrapper.orderByAsc(User::getCreateTime);
             if (StringUtils.hasLength(keyWord)) {
-                wrapper.like(User::getUserName, keyWord)
-                        .or().like(User::getNickName, keyWord)
-                        .or().like(User::getPhone, keyWord)
-                        .or().like(User::getUserStatus, keyWord)
-                        .or().like(User::getEmail, keyWord);
+                wrapper.like(User::getUserName, keyWord).or().like(User::getNickName, keyWord).or().like(User::getPhone, keyWord).or().like(User::getUserStatus, keyWord).or().like(User::getEmail, keyWord);
             }
             IPage<User> userIPage = userMapper.selectPage(page, wrapper);
-            BasePageBean pageBean = BasePageBean.builder()
-                    .pageNum(userIPage.getCurrent())
-                    .pageSize(userIPage.getSize())
-                    .pages(userIPage.getPages())
-                    .total(userIPage.getTotal())
-                    .data(
-                            CollectionUtils.isEmpty(userIPage.getRecords()) ? new ArrayList<>(0) :
-                                    userIPage.getRecords().stream().map(u -> {
-                                        GetUserListVO vo = new GetUserListVO();
-                                        BeanUtils.copyProperties(u, vo);
-                                        return vo;
-                                    }).collect(Collectors.toList()))
-                    .build();
+            BasePageBean pageBean = BasePageBean.builder().pageNum(userIPage.getCurrent()).pageSize(userIPage.getSize()).pages(userIPage.getPages()).total(userIPage.getTotal()).data(CollectionUtils.isEmpty(userIPage.getRecords()) ? new ArrayList<>(0) : userIPage.getRecords().stream().map(u -> {
+                GetUserListVO vo = new GetUserListVO();
+                BeanUtils.copyProperties(u, vo);
+                return vo;
+            }).collect(Collectors.toList())).build();
             result.setData(pageBean);
         } catch (Exception e) {
             log.error("获取用户列表失败,{}", e);
@@ -655,7 +546,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void updateStatus(UpdateStatusDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -688,7 +579,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【修改用户状态接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void resetUserPwd(String userId, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -710,7 +601,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【重置用户密码接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, userId, result);
         }
     }
-
+    
     @Override
     public void deleteUser(String userId, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -746,7 +637,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【用户删除接口】【{}ms】 \n入参:{}\n出参:{}", "删除", endTime - startTime, userId, result);
         }
     }
-
+    
     @Override
     public void createUser(CreateUserDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -803,7 +694,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【创建用户接口】【{}ms】 \n入参:{}\n出参:{}", "新增", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void checkUserPwd(String encryptPassword, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -825,7 +716,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【检查用户密码接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, encryptPassword, result);
         }
     }
-
+    
     @Override
     public void updateUserPwd(UpdateUserPwdDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -857,7 +748,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【修改用户密码接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void updateUserInfo(UpdateUserInfoDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -881,7 +772,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【修改用户信息接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void getUserDetailInfo(HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -900,7 +791,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户信息接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, "", result);
         }
     }
-
+    
     @Override
     public void getPersonal(HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -911,8 +802,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             BeanUtils.copyProperties(user, userVO);
             // 获取用户最后一次登陆地点
             LambdaQueryWrapper<UserLoginLog> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(UserLoginLog::getUserId, user.getUserId())
-                    .orderByDesc(UserLoginLog::getLoginTime).last("limit 1");
+            queryWrapper.eq(UserLoginLog::getUserId, user.getUserId()).orderByDesc(UserLoginLog::getLoginTime).last("limit 1");
             UserLoginLog loginLog = userLoginLogMapper.selectOne(queryWrapper);
             if (!ObjectUtils.isEmpty(loginLog)) {
                 userVO.setAddress(loginLog.getLoginAddress());
@@ -927,7 +817,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户个人信息接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, "", result);
         }
     }
-
+    
     @Override
     public void checkUserNameExist(CheckUsernameDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -959,7 +849,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【验证用户名是否存在接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void updateSelfInfo(UpdateSelfInfoDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -984,7 +874,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【修改用户个人信息接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void checkOldPassword(CheckOldPasswordDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1009,7 +899,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【验证旧密码是否正确接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void updatePassword(UpdatePwdDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1054,7 +944,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【修改密码接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void getSettingInfo(HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1082,7 +972,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户个人设置接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, "", result);
         }
     }
-
+    
     @Override
     public void getArticlePublishList(BaseRequest dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1114,7 +1004,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户发布列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, "", result);
         }
     }
-
+    
     @Override
     public void getArticleCollList(BaseRequest dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1134,12 +1024,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 articleQuery.eq(Article::getArticleStatus, 1).in(Article::getArticleId, articleIds).select(Article::getArticleId, Article::getArticleTitle, Article::getArticleStatus, Article::getArticleIsSelf, Article::getArticleRate);
                 List<Article> articleList = articleMapper.selectList(articleQuery);
                 Map<Integer, Article> articleMap = articleList.stream().collect(Collectors.toMap(Article::getArticleId, Function.identity(), (o1, o2) -> o1));
-
+                
                 LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
                 userLambdaQueryWrapper.select(User::getUserId, User::getNickName).in(User::getUserId, userIds);
                 List<User> userList = userMapper.selectList(userLambdaQueryWrapper);
                 Map<String, User> userMap = userList.stream().collect(Collectors.toMap(User::getUserId, Function.identity(), (o1, o2) -> o1));
-
+                
                 for (ArticleCollection articleCollection : collectionList) {
                     UserArticleCollListVO vo = new UserArticleCollListVO();
                     vo.setId(articleCollection.getId());
@@ -1149,6 +1039,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     vo.setStatus(ObjectUtils.isEmpty(article) ? -1 : 1);
                     if (!ObjectUtils.isEmpty(article)) {
                         BeanUtils.copyProperties(article, vo);
+                        // 设置文章标签
+                        List<Tag> tags = tagMapper.selectTagListByArticleId(article.getArticleId());
+                        List<String> tagNameList = tags.stream().map(Tag::getTagName).collect(Collectors.toList());
+                        vo.setTags(String.join(" ", tagNameList));
+                        // 阅读人数
+                        LambdaQueryWrapper<ArticleRead> readNumWrapper = new LambdaQueryWrapper<>();
+                        readNumWrapper.eq(ArticleRead::getArticleId, article.getArticleId());
+                        vo.setReadNum(articleReadMapper.selectCount(readNumWrapper));
                     }
                     voList.add(vo);
                 }
@@ -1168,7 +1066,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户收藏列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, "", result);
         }
     }
-
+    
     @Override
     public void operaPointSetting(UserPointSettingDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1191,7 +1089,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【用户积分设置操作接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void operaRewardSetting(UserRewardSettingDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1222,7 +1120,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     result.setMsg(CurrencyErrorEnum.DATABASE_ERROR.getMsg());
                 }
             }
-
+            
         } catch (Exception e) {
             log.error("用户打赏设置操作失败,{}", e);
             result.setCode(CurrencyErrorEnum.OPERA_ERROR.getCode());
@@ -1232,7 +1130,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【用户打赏设置操作接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void updateRewardImgInfo(UserupdateRewardImgInfoDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1255,7 +1153,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【更新用户打赏信息接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void searchUserResult(KeyWordSearchDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1263,8 +1161,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String keyWord = dto.getKeyWord();
             LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
             if (StringUtils.hasLength(keyWord)) {
-                queryWrapper.select(User::getUserId, User::getNickName).like(User::getUserName, keyWord)
-                        .or().like(User::getNickName, keyWord);
+                queryWrapper.select(User::getUserId, User::getNickName).like(User::getUserName, keyWord).or().like(User::getNickName, keyWord);
             } else {
                 queryWrapper.select(User::getUserId, User::getNickName).last("limit 10");
             }
@@ -1284,7 +1181,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【搜索用户接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void removeArticleColl(Integer id, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1311,7 +1208,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【用户删除收藏列表接口】【{}ms】 \n入参:{}\n出参:{}", "删除", endTime - startTime, id, result);
         }
     }
-
+    
     @Override
     public void removeMyArticle(Integer articleId, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1344,7 +1241,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【用户删除自己的文章接口】【{}ms】 \n入参:{}\n出参:{}", "删除", endTime - startTime, articleId, result);
         }
     }
-
+    
     @Override
     public void getUserAuth(String userId, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1365,7 +1262,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【管理员-获取用户权限接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, userId, result);
         }
     }
-
+    
     @Override
     public void updateUserAuth(UpdateUserAuthDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1413,7 +1310,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【管理员-修改用户权限接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void getFeedbackList(BaseRequest dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1445,7 +1342,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户反馈列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     @Transactional
     public void register(UserRegirsterDTO dto, HttpServletRequest request, BaseResult result) {
@@ -1518,7 +1415,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 result.setMsg(CurrencyErrorEnum.OPERA_ERROR.getMsg() + ",验证码校验失败");
             }
         } catch (Exception e) {
-            log.error("新用户注册失败,{}", e);
+            log.error("新用户注册失败,{}", e.getMessage());
             result.setCode(CurrencyErrorEnum.OPERA_ERROR.getCode());
             result.setMsg(CurrencyErrorEnum.OPERA_ERROR.getMsg());
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -1527,7 +1424,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【新用户注册接口】【{}ms】 \n入参:{}\n出参:{}", "新增", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void operaReceiveEmailNoticeSetting(UserReceiveEmailNoticeSettingDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1550,7 +1447,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【更新用户邮件接收功能接口】【{}ms】 \n入参:{}\n出参:{}", "修改", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void checkEmailBindStatus(CheckEmailBindDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1572,7 +1469,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【验证邮箱是否绑定用户超过3个接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void getPointTradeFlow(BaseRequest dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1604,7 +1501,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户积分交易流水接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void sign(HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1646,7 +1543,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【用户签到接口】【{}ms】 \n入参:{}\n出参:{}", "", endTime - startTime, "", result);
         }
     }
-
+    
     @Override
     public void getFeedbackInfo(Integer id, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1685,7 +1582,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户反馈详情接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, id, result);
         }
     }
-
+    
     @Override
     public void getReportList(BaseRequest dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1717,7 +1614,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户举报列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     @Override
     public void getReportInfo(Integer id, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1759,7 +1656,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户举报详情接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, id, result);
         }
     }
-
+    
     @Override
     public void adminGetSimpleUserList(GetSimpleUserListDTO dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1768,10 +1665,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String keyWord = dto.getKeyWord();
             wrapper.orderByAsc(User::getCreateTime);
             if (StringUtils.hasLength(keyWord)) {
-                wrapper.like(User::getUserName, keyWord)
-                        .or().like(User::getNickName, keyWord)
-                        .or().like(User::getPhone, keyWord)
-                        .or().like(User::getEmail, keyWord);
+                wrapper.like(User::getUserName, keyWord).or().like(User::getNickName, keyWord).or().like(User::getPhone, keyWord).or().like(User::getEmail, keyWord);
             }
             wrapper.select(User::getUserId, User::getUserName, User::getNickName, User::getAvatar);
             List<User> userList = userMapper.selectList(wrapper);
@@ -1790,7 +1684,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, dto, result);
         }
     }
-
+    
     @Override
     public void getUserOrderList(BaseRequest dto, HttpServletRequest request, BaseResult result) {
         long startTime = System.currentTimeMillis();
@@ -1827,7 +1721,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             log.info("【{}】【获取用户订单列表接口】【{}ms】 \n入参:{}\n出参:{}", "查询", endTime - startTime, JSON.toJSONString(dto), result);
         }
     }
-
+    
     /***
      * 获取客户端IP地址;这里通过了Nginx获取;X-Real-IP
      */
@@ -1836,7 +1730,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return "unknown";
         }
         String ip = request.getHeader("x-forwarded-for");
-
+        
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getHeader("Proxy-Client-IP");
         }
@@ -1846,7 +1740,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 // 多次反向代理后会有多个IP值，第一个为真实IP。
                 int index = ip.indexOf(',');
                 if (index != -1) {
-                    ip =  ip.substring(0, index);
+                    ip = ip.substring(0, index);
                 }
             }
         }
@@ -1859,18 +1753,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        if("0:0:0:0:0:0:0:1".equals(ip)){
+        if ("0:0:0:0:0:0:0:1".equals(ip)) {
             return "127.0.0.1";
-        }else {
-            if(ip.equals("127.0.0.1") || ip.equalsIgnoreCase("localhost") && !StringUtils.hasLength(request.getRemoteAddr())){
+        } else {
+            if (ip.equals("127.0.0.1") || ip.equalsIgnoreCase("localhost") && !StringUtils.hasLength(request.getRemoteAddr())) {
                 ip = request.getRemoteAddr();
             }
         }
         log.info("当前ip:" + ip);
         return ip;
     }
-
-
+    
+    
 }
 
 

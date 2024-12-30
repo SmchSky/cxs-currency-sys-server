@@ -8,11 +8,9 @@ import com.cxs.exception.CurrencyException;
 import com.cxs.model.Feedback;
 import com.cxs.model.FeedbackReply;
 import com.cxs.model.Report;
-import lombok.Data;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.text.MessageFormat;
 
 /**
@@ -35,7 +32,7 @@ import java.text.MessageFormat;
 @Component
 public class SendMailUtil {
     @Autowired
-    private JavaMailSenderImpl javaMailSender;
+    private JavaMailSender javaMailSender;
 
     @Autowired
     private MailConfig mailConfig;
@@ -53,7 +50,7 @@ public class SendMailUtil {
             helper.setSubject(subject);
             helper.setText(content, true);
             helper.setTo(to);
-            helper.setFrom(mailConfig.getTitle() + "中心<" + mailConfig.getUsername() + ">");
+            helper.setFrom(mailConfig.getUsername());
             javaMailSender.send(message);
         } catch (MessagingException e) {
             throw new CurrencyException(CurrencyErrorEnum.SYSTEM_ERROR);
