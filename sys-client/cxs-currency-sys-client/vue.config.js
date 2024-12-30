@@ -1,5 +1,5 @@
 const {defineConfig} = require('@vue/cli-service')
-const name = '小白博客' // page title
+const name = '虚拟计算机交流社区' // page title
 const path = require('path')
 const CompressionWebpackPlugin = require('compression-webpack-plugin');
 const productionGzipExtensions = ['js', 'css'];
