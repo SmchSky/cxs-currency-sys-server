@@ -1,13 +1,14 @@
 <template>
   <div class="all-data">
     <el-row :gutter="20" class="data-row">
-      <el-col :span="10"><div class="grid-content bg-purple">文章标题</div></el-col>
-      <el-col :span="6"><div class="grid-content bg-purple">作者</div></el-col>
-      <el-col :span="4"><div class="grid-content bg-purple">文章评分</div></el-col>
+      <el-col :span="7"><div class="grid-content bg-purple">文章标题</div></el-col>
+      <el-col :span="5"><div class="grid-content bg-purple">标签</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">作者</div></el-col>
+      <el-col :span="4"><div class="grid-content bg-purple">浏览次数</div></el-col>
       <el-col :span="4"><div class="grid-content bg-purple">操作</div></el-col>
     </el-row>
-    <el-row :gutter="20" class="data-item" v-if="dataBean" v-for="(item, index) in dataBean.data" :key="item.id">
-      <el-col :span="10">
+    <el-row :gutter="20" class="data-item" v-if="dataBean" v-for="(item) in dataBean.data" :key="item.id">
+      <el-col :span="7">
         <div v-if="item.status && item.status === 1" class="grid-content bg-purple cursor" @click="$router.push({name: 'article-detail', params: {id: item.articleId}})">
           <el-link :underline="false">
             {{item.articleTitle}}
@@ -30,14 +31,19 @@
           </el-tag>
         </div>
       </el-col>
-      <el-col :span="6">
+      <el-col :span="5">
+        <div class="grid-content bg-purple">
+          {{item.tags}}
+        </div>
+      </el-col>
+      <el-col :span="5">
         <div class="grid-content bg-purple">
           {{item.author}}
         </div>
       </el-col>
       <el-col :span="4">
         <div class="grid-content bg-purple">
-          {{ item.articleRate }} 分
+          {{ item.readNum }} 次
         </div>
       </el-col>
       <el-col :span="4">

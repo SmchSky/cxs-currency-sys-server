@@ -1,5 +1,5 @@
 <template>
-  <span>小白博客提醒您,请使用PC访问系统</span>
+  <span>虚拟计算机交流社区提醒您,请使用PC访问系统</span>
 </template>
 
 <script>

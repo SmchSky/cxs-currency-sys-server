@@ -400,7 +400,7 @@ export default {
   },
   watch:{
     "$route.params" :{
-      handler: function (newsValue, oldValue) {
+      handler: function (newsValue) {
         this.articleId = newsValue.id
         this.getArticleInfoHandle()
       }
@@ -626,7 +626,7 @@ export default {
           commentTo: this.commentTo ? this.commentTo : this.articleInfo.articleBelongUserId,
           parentCommentId: this.parentCommentId
         }
-        publishComment(comment).then(res => {
+        publishComment(comment).then(() => {
           this.$message.success('评论成功')
           this.$bus.$emit('opera-value', '')
           this.getCommentList()

@@ -1,13 +1,12 @@
 <template>
   <div class="all-data">
     <el-row :gutter="20" class="data-row">
-      <el-col :span="10"><div class="grid-content bg-purple">文章标题</div></el-col>
+      <el-col :span="8"><div class="grid-content bg-purple">文章标题</div></el-col>
       <el-col :span="5"><div class="grid-content bg-purple">文章状态</div></el-col>
-      <el-col :span="5"><div class="grid-content bg-purple">文章评分</div></el-col>
       <el-col :span="4"><div class="grid-content bg-purple">操作</div></el-col>
     </el-row>
-    <el-row :gutter="20" class="data-item" v-if="dataBean" v-for="(item, index) in dataBean.data" :key="item.id">
-      <el-col :span="10">
+    <el-row :gutter="20" class="data-item" v-if="dataBean" v-for="(item) in dataBean.data" :key="item.id">
+      <el-col :span="8">
         <div v-if="item.articleStatus === 1" class="grid-content bg-purple cursor" @click="$router.push({name: 'article-detail', params: {id: item.articleId}})">
           <el-link :underline="false">
             {{item.articleTitle}}
@@ -65,9 +64,11 @@
           {{ item.articleRate }} 分
         </div>
       </el-col>
-      <el-col :span="4">
+      <el-col :span="5">
         <div v-if="item.articleStatus === 1" class="grid-content bg-purple">
           <el-button slot="reference" type="primary" size="small" title="详情" icon="el-icon-tickets" circle @click="detailHandle(item)"></el-button>
+          <el-button slot="reference" type="primary" size="small" title="编辑" icon="el-icon-edit" circle @click="editHandle(item)"></el-button>
+          <el-button slot="reference" type="danger" size="small" title="删除" icon="el-icon-delete" circle @click="delHandle(item)"></el-button>
         </div>
         <div v-else-if="item.articleStatus === 0 || item.articleStatus === 2" class="grid-content bg-purple">
           <el-button slot="reference" type="primary" size="small" title="编辑" icon="el-icon-edit" circle @click="editHandle(item)"></el-button>
@@ -90,7 +91,6 @@
 
 <script>
 import {getArticlePublishList, removeMyArticle} from "@/api/user";
-import {cancelCollectionArticle} from "@/api/article";
 
 export default {
   name: "PushInfo",
@@ -127,8 +127,8 @@ export default {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
-      }).then(res => {
-        removeMyArticle(item.articleId).then(res => {
+      }).then(() => {
+        removeMyArticle(item.articleId).then(() => {
           this.$message.success('文章删除成功')
           this.init()
         })
