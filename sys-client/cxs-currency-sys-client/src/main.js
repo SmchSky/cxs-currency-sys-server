@@ -123,6 +123,7 @@ import {
 import device from "vue-device-detector"
 import {PUBLIC_KEY} from "@/utils/constant";
 
+Vue.config.debug = true;
 Vue.use(device)
 Vue.use(Result);
 Vue.use(Empty);
