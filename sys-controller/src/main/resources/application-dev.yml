@@ -16,7 +16,7 @@ common:
     admin-role-name: "ROLE_admin"
     user-role-name: "ROLE_user"
   file-upload:
-    path: "D:/code/cxsCode/xiaobai-blob/cxs-currency-sys-server/upload"
+    path: "C:/Users/A/Desktop/cxs-currency-sys-server/upload"
     img-suffix: ".jpg,.png,.jpeg"
     file-suffix: ".zip,.tar"
     img-path: "images"
@@ -34,9 +34,9 @@ spring:
     tempDir: temp
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql:///cxs_currency_sys?useUnicode=true&useSSL=false&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/cxs_currency_sys
     username: root
-    password: 123456
+    password: root
     database: cxs_currency_sys
     type: com.alibaba.druid.pool.DruidDataSource
     # 初始连接数
@@ -55,15 +55,20 @@ spring:
     maxEvictableIdleTimeMillis: 900000
   # 邮件发送
   mail:
-    username: 写你的
-    password: 写你的
-    host: smtp.163.com
-    phone: 写你的
-    title: "小白博客运营"
+    username: 2503783778@qq.com
+    password: xngrjptkefiqecej
+    host: smtp.qq.com
+    port: 465
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
   redis:
     host: 127.0.0.1
     port: 6379
-    password: "cxs2022"
+    password: "root"
     jedis:
       pool:
         #最大连接数

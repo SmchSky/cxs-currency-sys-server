@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "spring.mail")
 @Data
 public class MailConfig {
+    private Integer port;
     private String host;
     private String username;
     private String password;
