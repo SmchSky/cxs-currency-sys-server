@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="sys-controller" />
+        <module name="sys-dao" />
+        <module name="sys-task" />
+        <module name="sys-service" />
+        <module name="sys-common" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="cxs-currency-sys-server" options="-parameters" />
+      <module name="sys-common" options="-parameters" />
+      <module name="sys-controller" options="-parameters" />
+      <module name="sys-dao" options="-parameters" />
+      <module name="sys-service" options="-parameters" />
+      <module name="sys-task" options="-parameters" />
+    </option>
+  </component>
+</project>

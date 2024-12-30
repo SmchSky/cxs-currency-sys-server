@@ -157,21 +157,21 @@
         <div class="content">
           <el-form ref="form" :model="articleInfo" label-width="80px">
             <el-form-item label="文章标题">
-              {{articleInfo.articleTitle}}
+              {{ articleInfo.articleTitle }}
             </el-form-item>
             <el-form-item label="文章摘要">
-              {{articleInfo.articleAbstract}}
+              {{ articleInfo.articleAbstract }}
             </el-form-item>
             <el-form-item label="是否原创" class="postInfo-container-item">
-              <el-tag type="success" v-if="articleInfo.articleIsSelf === 1">
+              <el-tag v-if="articleInfo.articleIsSelf === 1" type="success">
                 原创
               </el-tag>
-              <el-tag type="info" v-else>
+              <el-tag v-else type="info">
                 转载
               </el-tag>
             </el-form-item>
             <el-form-item v-if="articleInfo.articleIsSelf == 0" style="margin-bottom: 20px;" label="原文地址">
-              {{articleInfo.originalLink}}
+              {{ articleInfo.originalLink }}
             </el-form-item>
             <el-form-item v-if="articleInfo.type" label="文章分类" class="postInfo-container-item" prop="articleType">
               <el-select
@@ -259,7 +259,7 @@
 <script>
 import waves from '@/directive/waves' // waves directive
 import Pagination from '@/components/Pagination'
-import { deleteArticle, getArticleInfo, getArticleList, reviewedArticle, updateArticle } from '@/api/article'
+import { deleteArticle, getArticleInfo, getArticleList } from '@/api/article'
 import { URL_PREFIX } from '@/api/config'
 import { getAdminTechnologyTypeList } from '@/api/technology'
 

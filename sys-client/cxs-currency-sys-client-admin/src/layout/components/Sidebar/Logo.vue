@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      title: '小白博客运营中台',
+      title: '虚拟计算机交流社区运营中台',
       logo: logo
     }
   }
